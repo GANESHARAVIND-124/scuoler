@@ -112,7 +112,7 @@ stage('snyk_analysis') {
         script {
           try {
             if (fileExists('package.json')) {
-              sh 'npm install --force'
+              //sh 'npm install --force'
               //sh 'npm test'
             } else {
               echo 'No package.json found, skipping Frontend build and test.'
