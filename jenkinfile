@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    environment {
+        SONARCLOUD = 'Sonarcloud'
+    }
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Git-Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        // /opt/sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner
+        stage('Compile and Run Sonar Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv(credentialsId: SONARCLOUD, installationName: 'Sonarcloud') {
+                        try {
+                            if (fileExists('pom.xml')) {
+                                sh 'mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
+                            } else if (fileExists('package.json')) {
+                                sh "${sonarscanner} -Dsonar.organization=jenkeen -Dsonar.projectKey=jenkeen_testjs -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=b8c55c159b1fd559baaccf9bee42344faed0a7b4"
+                            } else if (fileExists('go.mod')) {
+                                sh "${sonarscanner} -Dsonar.organization=jenkeen -Dsonar.projectKey=jenkeen_go -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=b8c55c159b1fd559baaccf9bee42344faed0a7b4"
+                            } else if (fileExists('Gemfile')) {
+                                sh "${sonarscanner} -Dsonar.organization=jenkeen -Dsonar.projectKey=jenkeen_ruby -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=b8c55c159b1fd559baaccf9bee42344faed0a7b4"
+                            } else if (fileExists('requirements.txt')) {
+                                sh "${sonarscanner} -Dsonar.organization=jenkeen -Dsonar.projectKey=jenkeen_python -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=b8c55c159b1fd559baaccf9bee42344faed0a7b4"
+                            } else {
+                                currentBuild.result = 'FAILURE'
+                                pipelineError = true
+                                error("Unsupported application type: No compatible build steps available.")
+                            }
+                        } catch (Exception e) {
+                            currentBuild.result = 'FAILURE'
+                            pipelineError = true
+                            error("Error during Sonar analysis: ${e.message}")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
