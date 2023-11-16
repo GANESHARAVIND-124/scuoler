@@ -26,7 +26,7 @@ pipeline {
     SNYK_INSTALLATION = 'snyk@latest'
     SNYK_TOKEN = 'Snyk'
     DOCKER_REGISTRY_CREDENTIALS = 'Docker_Server'
-    DOCKER_IMAGE = 'ganesharavind124/anacart:latest'
+    DOCKER_IMAGE = 'ganesharavind124/scuoler:latest'
     DOCKER_TOOL = 'Docker'
     DOCKER_URL = 'https://index.docker.io/v1/'
     KUBE_CONFIG = 'kubernetes'
@@ -313,21 +313,19 @@ stage('snyk_analysis') {
         }
       }
     }
-    stage('Build Docker Image') {
+    stage('Build and Push Docker Image') {
       steps {
         script {
           try {
-            if (fileExists('Dockerfile')) {
-              def dockerImage = docker.build(DOCKER_IMAGE, ".")
-            } else {
-              error("Dockerfile not found. Cannot build Docker image.")
-              currentBuild.result = 'FAILURE'
-              pipelineError = true
+            withDockerRegistry(credentialsId: DOCKER_REGISTRY_CREDENTIALS, toolName: DOCKER_TOOL, url: DOCKER_URL) {
+                def dockerImage = docker.build(DOKCER_IMAGE, ".")
+                    // Push the built Docker image
+                dockerImage.push()
             }
           } catch (Exception e) {
             currentBuild.result = 'FAILURE'
             pipelineError = true
-            error("Error during Docker image build: ${e.message}")
+            echo "Error during Docker image push: ${e.message}"
           }
         }
       }
@@ -348,27 +346,11 @@ stage('snyk_analysis') {
             
         }
     }
-    stage('Push Docker Image') {
-      steps {
-        script {
-          try {
-            withDockerRegistry(credentialsId: DOCKER_REGISTRY_CREDENTIALS, toolName: DOCKER_TOOL, url: DOCKER_URL) {
-              def dockerImage = docker.image(DOCKER_IMAGE)
-              dockerImage.push()
-            }
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            pipelineError = true
-            echo "Error during Docker image push: ${e.message}"
-          }
-        }
-      }
-    }
     stage('Kubernetes Deployment') {
         steps {
             script {
                 def configFile = 'deployment.yaml'
-                def namespace = 'anacart' // Replace 'your-namespace' with your actual namespace 
+                def namespace = 'scuoler' // Replace 'your-namespace' with your actual namespace 
     
                 if (fileExists(configFile)) {
                      kubernetesDeploy(configs: configFile, kubeconfigId: KUBE_CONFIG, namespace: namespace)
