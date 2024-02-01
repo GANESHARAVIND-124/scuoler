@@ -28,7 +28,7 @@
     "libpq": "^1.8.9",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^6.6.2",
+    "nodemailer": "^6.9.9",
     "peer": "^0.6.1",
     "pg": "^8.6.0",
     "pg-native": "^3.0.0",
