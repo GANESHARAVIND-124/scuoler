@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
-    "cloudinary": "^1.25.2",
+    "cloudinary": "^1.37.3",
     "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
     "debug": "~2.6.9",
