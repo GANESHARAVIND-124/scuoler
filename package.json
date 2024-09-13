@@ -18,7 +18,7 @@
     "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
     "debug": "~2.6.9",
-    "express": "^4.17.1",
+    "express": "^4.21.0",
     "express-form-data": "^2.0.17",
     "express-session": "1.15.6",
     "express-sslify": "^1.2.0",
